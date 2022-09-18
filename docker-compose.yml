@@ -1,0 +1,56 @@
+version: "3.7"
+
+services:
+  postgres:
+    container_name: livraison-db
+    image: postgres:13
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: livraisondb
+      POSTGRES_USER: adminLivraison
+      POSTGRES_PASSWORD: passwordLivraison
+    networks:
+      - livraison
+
+  livraison-api:
+    container_name: livraison-api
+    depends_on:
+      - postgres
+    image: registry.gitlab.com/meqqori/livraison-api:V2
+    volumes:
+      - ~/backup/public:/app/public
+    environment:
+      NODE_ENV: development
+      PORT: 4444
+      DB_NAME: livraisondb
+      DB_SCHEMA: livraison
+      DB_USERNAME: adminLivraison
+      DB_PASSWORD: passwordLivraison
+      DB_HOST: postgres
+      DB_PORT: 5432
+      VONAGE_URL: api.nexmo.com
+      VONAGE_API_KEY: e8c7844d
+      VONNAGE_API_SECRET: x1SOaGm0K5LOFgF7
+      JWT_RSA_PRIVATE_KEY: MIICXQIBAAKBgQC5NyjzUYsJ1Yh6KmzAjmn5hhs0E+coMHYfG3x4N4K1Qwy0e9NSylsaQuV+YGyqp7s8V0tjAgs4NgQkf/PfXvupazjx7VksvFe63PLr3q1+NEAiDBaPHWec8fob/3+WEzluFMuF51t8BkNfJpg2wPXC5bTm02chmsQ0kE3n2kbWIwIDAQABAoGAeyxzz10rWh7n5FbSfDw5vfexn7Ccyd1wsL9Wx5wjEOjGSkEPCMAKViym8qStn9BsdHSZbf6t93P0zVFKngJM2fzwAOmJQTJg0ul8BXmcYrf3uNRTiBGZVT4bYDVou90mlwYLD12xNfgppZAlczpzuhyuTUUCGidgFgDYMxQgvgECQQDgtTyVOMfKrUw4/Xvi7CjVFfOhIRjqWBv907loGuL5p0+fCCGC2vt732FO/PGr7sVKpPtTSp13hb7NBYydWMkXAkEA0wIHhS1M6TIbgIjltOI/cu7gJ/kN2iXUpUwsvI6DUuJCSTRq63P7OQGz0qenwtkyI0hv5eUSvifrm4o2g3xq1QJBAJ0C5mcaOrhK6QS1UjhYbZue8BI5jzBICp8MrvOoPcrV9pOX2dqWary+dD7+DVvmxiKHLzme3HKkmJKnev6DCFcCQExFWoSICFnuc8R1N1q3wSmBMOMiAiDNNdz9+Nm7RbrK8BzX5qHvDWrgs6g8U8Z5jcb1IwVdVPYJJf/V6LiEW3UCQQCOa4+d1D4WXtnRHZ4JRcQvv/MR5ut4P/ogCYHUZiCLwymGXIaFfv0BkPRqZ6aMqgqYnHlCBKqNiRdDG3URSd6L
+      JWT_RSA_PUBLIC_KEY: MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5NyjzUYsJ1Yh6KmzAjmn5hhs0E+coMHYfG3x4N4K1Qwy0e9NSylsaQuV+YGyqp7s8V0tjAgs4NgQkf/PfXvupazjx7VksvFe63PLr3q1+NEAiDBaPHWec8fob/3+WEzluFMuF51t8BkNfJpg2wPXC5bTm02chmsQ0kE3n2kbWIwIDAQAB
+    ports:
+      - "4444:4444"
+    networks:
+      - livraison
+
+  livraison-admin-app:
+    container_name: livraison-admin-app
+    image: registry.gitlab.com/meqqori/livraison-admin-app:V2
+    ports:
+      - "4000:80"
+    environment:
+      PORT: 4000
+    networks:
+      - livraison
+
+networks:
+  livraison:
+    external: true
